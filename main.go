@@ -1,31 +1,33 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/alecthomas/kong"
 )
 
-type Context struct {
-}
+var version = "1.0.0" // This should be set during the build process
 
 type CLI struct {
+	Version kong.VersionFlag `help:"Print version information and exit"`
 }
 
-func (r *CLI) Run(ctx *Context) error {
+func (cli *CLI) Run() error {
 	now := time.Now().UTC().Format(time.RFC3339)
-	println(now)
+	fmt.Println(now)
 	return nil
 }
 
 func main() {
-	// Parse the command line
-	var cli CLI
-	ctx := kong.Parse(&cli)
+	cli := CLI{}
 
-	// Call the Run() method of the selected parsed command.
-	err := ctx.Run(&Context{})
+	ctx := kong.Parse(&cli,
+		kong.Description("A simple CLI that prints the current UTC time in RFC3339 format."),
+		kong.UsageOnError(),
+		kong.Vars{"version": version},
+	)
 
-	// FatalIfErrorf terminates with an error message if err != nil
+	err := cli.Run()
 	ctx.FatalIfErrorf(err)
 }
